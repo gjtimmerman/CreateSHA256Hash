@@ -1,0 +1,18 @@
+﻿<Window x:Class="CreateSHA256Hash.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CreateSHA256Hash"
+        mc:Ignorable="d"
+        Title="ComputeHash" Height="450" Width="800">
+    <Grid x:Name="ComputeHashButton">
+        <TextBox x:Name="FileNameTextBox" HorizontalAlignment="Left" Height="26" Margin="171,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="313"/>
+        <Label Content="FileName:" HorizontalAlignment="Left" Height="26" Margin="35,109,0,0" VerticalAlignment="Top" Width="103"/>
+        <Button Content="Browse..." HorizontalAlignment="Left" Height="26" Margin="540,109,0,0" VerticalAlignment="Top" Width="104" Click="Button_Click"/>
+        <Button Content="Compute Hash" HorizontalAlignment="Left" Height="26" Margin="171,206,0,0" VerticalAlignment="Top" Width="94" Click="Button_Click_1"/>
+        <TextBox x:Name="ResultTextBox" HorizontalAlignment="Left" Height="29" Margin="171,314,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="473" IsReadOnlyCaretVisible="True"/>
+        <Label Content="Hash:" HorizontalAlignment="Left" Height="29" Margin="35,314,0,0" VerticalAlignment="Top" Width="92"/>
+
+    </Grid>
+</Window>
