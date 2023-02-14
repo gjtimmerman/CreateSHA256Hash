@@ -117,6 +117,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             myOpenFileSettings.lStructSize = sizeof(OPENFILENAME);
             myOpenFileSettings.nMaxFile = MAX_FILENAME;
             myOpenFileSettings.lpstrFile = fileName;
+            myOpenFileSettings.lpstrFilter = L"Executable Files\0*.exe\0All Files\0*.*\0";
             if (GetOpenFileName(&myOpenFileSettings) != 0)
             {
                 SetDlgItemText(hWnd, IDC_EDIT1, myOpenFileSettings.lpstrFile);
