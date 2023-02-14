@@ -15,3 +15,5 @@
 #include <tchar.h>
 #include <commdlg.h>
 #include <fstream>
+#include <bcrypt.h>
+#include <sstream>
