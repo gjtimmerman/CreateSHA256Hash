@@ -5,6 +5,7 @@
 #include "CreateSHA256Hash.h"
 
 #define MAX_LOADSTRING 100
+#define MAX_FILENAME 1024
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -27,6 +28,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return 0;
 }
 
+char* CalculateHashOfFile(wchar_t *fileName)
+{
+    char* returnValue = nullptr;
+    std::ifstream inputFile;
+    inputFile.open(fileName,std::ios::in | std::ios::binary);
+    return returnValue;
+}
+
 
 OPENFILENAME myOpenFileSettings;
 
@@ -39,19 +48,19 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_INITDIALOG:
         return (INT_PTR)TRUE;
     case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hWnd, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
+        //if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        //{
+        //    EndDialog(hWnd, LOWORD(wParam));
+        //    return (INT_PTR)TRUE;
+        //}
         if (LOWORD(wParam == IDC_BUTTON1))
         {
-            wchar_t fileName[1024] = {};
+            wchar_t fileName[MAX_FILENAME+1] = {};
             memset(&myOpenFileSettings, 0, sizeof(OPENFILENAME));
             myOpenFileSettings.hwndOwner = hWnd;
             myOpenFileSettings.hInstance = hInst;
             myOpenFileSettings.lStructSize = sizeof(OPENFILENAME);
-            myOpenFileSettings.nMaxFile = 1024;
+            myOpenFileSettings.nMaxFile = MAX_FILENAME;
             myOpenFileSettings.lpstrFile = fileName;
             if (GetOpenFileName(&myOpenFileSettings) != 0)
             {
@@ -61,6 +70,12 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 error = CommDlgExtendedError();
             }
+        }
+        else if (LOWORD(wParam == IDC_BUTTON2))
+        {
+            wchar_t fileName[MAX_FILENAME+1];
+            GetDlgItemText(hWnd, IDC_EDIT1, fileName, MAX_FILENAME);
+            char* hash = CalculateHashOfFile(fileName);
         }
         break;
 
