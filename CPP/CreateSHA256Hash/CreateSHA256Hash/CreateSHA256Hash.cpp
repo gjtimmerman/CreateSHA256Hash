@@ -5,8 +5,8 @@
 #include "CreateSHA256Hash.h"
 
 #define MAX_LOADSTRING 100
-#define MAX_FILENAME 1024
-#define MAX_READBUFFER 0x1000
+#define MAX_FILENAME 900
+#define MAX_READBUFFER 0x100
 #define HASH_LENGTH 32
 
 // Global Variables:
@@ -26,9 +26,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     DialogBox(hInst, MAKEINTRESOURCE(IDD_FORMVIEW), nullptr, &WndProc);
 
-
+    ExitProcess(0);
     return 0;
 }
+
+
 
 int evaluateBStatus(NTSTATUS status)
 {
@@ -37,21 +39,21 @@ int evaluateBStatus(NTSTATUS status)
     switch (status)
     {
     case STATUS_INVALID_HANDLE:
-        throw std::runtime_error("Cryptographic function returned error code: STATUS_INVALID_HANDLE");
+        return 1;
     case STATUS_INVALID_PARAMETER:
-        throw std::runtime_error("Cryptographic function returned error code: STATUS_INVALID_PARAMETER");
+        return 1;
     case STATUS_NO_MEMORY:
-        throw std::runtime_error("Cryptographic function returned error code: STATUS_NO_MEMORY");
+        return 1;
     default:
-        throw std::runtime_error("Cryptographic function returned unknown error code");
+        return 1;
     }
 
 }
 
 void CalculateHashOfFile(wchar_t *fileName, unsigned char *hash, size_t hashLength)
 {
-    std::ifstream inputFile;
-    inputFile.open(fileName,std::ios::in | std::ios::binary);
+    HANDLE inputFile;
+    inputFile = CreateFile(fileName, FILE_GENERIC_READ,0,nullptr,0,0,0);
     BCRYPT_ALG_HANDLE algHandle;
     NTSTATUS bStatus;
     bStatus = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_SHA256_ALGORITHM, NULL, 0);
@@ -63,7 +65,7 @@ void CalculateHashOfFile(wchar_t *fileName, unsigned char *hash, size_t hashLeng
     evaluateBStatus(bStatus);
     if (actualHashLength != hashLength)
     {
-        throw std::domain_error("Wrong hash size!");
+        return;
     }
     BCRYPT_HASH_HANDLE hashHandle;
     bStatus = BCryptCreateHash(algHandle, &hashHandle, NULL, 0, NULL, 0, 0);
@@ -71,19 +73,22 @@ void CalculateHashOfFile(wchar_t *fileName, unsigned char *hash, size_t hashLeng
     bStatus = BCryptCloseAlgorithmProvider(algHandle, 0);
     evaluateBStatus(bStatus);
     unsigned char buffer[MAX_READBUFFER];
-    inputFile.read((char *)buffer, MAX_READBUFFER);
-    while (!inputFile.eof())
+    DWORD bytesRead;
+    ReadFile(inputFile, buffer, MAX_READBUFFER, &bytesRead,nullptr);
+    while (bytesRead == MAX_READBUFFER)
     {
         bStatus = BCryptHashData(hashHandle, buffer, MAX_READBUFFER, 0);
         evaluateBStatus(bStatus);
-        inputFile.read((char *)buffer, MAX_READBUFFER);
+//        inputFile.read((char *)buffer, MAX_READBUFFER);
+        ReadFile(inputFile, buffer, MAX_READBUFFER, &bytesRead, nullptr);
+
     }
-    if (inputFile.gcount() != 0)
+   if (bytesRead > 0)
     {
-        bStatus = BCryptHashData(hashHandle, buffer, (ULONG)inputFile.gcount(), 0);
+        bStatus = BCryptHashData(hashHandle, buffer, (ULONG)bytesRead, 0);
         evaluateBStatus(bStatus);
     }
-    inputFile.close();
+    CloseHandle(inputFile);
     bStatus = BCryptFinishHash(hashHandle, hash, (ULONG)hashLength, 0);
     evaluateBStatus(bStatus);
     bStatus = BCryptDestroyHash(hashHandle);
@@ -110,8 +115,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         else if (LOWORD(wParam == IDC_BUTTON1))
         {
-            wchar_t fileName[MAX_FILENAME+1] = {};
-            memset(&myOpenFileSettings, 0, sizeof(OPENFILENAME));
+            wchar_t fileName[MAX_FILENAME+1];
             myOpenFileSettings.hwndOwner = hWnd;
             myOpenFileSettings.hInstance = hInst;
             myOpenFileSettings.lStructSize = sizeof(OPENFILENAME);
@@ -133,15 +137,15 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             GetDlgItemText(hWnd, IDC_EDIT1, fileName, MAX_FILENAME);
             unsigned char hash[HASH_LENGTH];
             CalculateHashOfFile(fileName, hash, HASH_LENGTH);
-            std::basic_stringstream<wchar_t> hashStr;
+            wchar_t hashStr[(HASH_LENGTH) + 1 * 2];
+            hashStr[0] = '\0';
             for (int i = 0; i < HASH_LENGTH; i++)
             {
-                hashStr.width(2);
-                hashStr.fill('0');
-                hashStr << std::hex << hash[i];
+                wchar_t tmp[4];
+                wsprintf(tmp, L"%2x",hash[i]);
+                wcscat(hashStr, tmp);
             }
-            std::basic_string<wchar_t> result = hashStr.str();
-            SetDlgItemText(hWnd, IDC_EDIT2, result.c_str());
+            SetDlgItemText(hWnd, IDC_EDIT2, hashStr);
         }
         break;
 
