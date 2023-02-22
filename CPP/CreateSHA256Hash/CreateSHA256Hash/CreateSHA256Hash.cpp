@@ -15,6 +15,16 @@ HINSTANCE hInst;                                // current instance
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+int APIENTRY wWinMainCRTStartup(_In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
+{
+    int retVal = wWinMain(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+    ExitProcess(retVal);
+
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -26,7 +36,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     DialogBox(hInst, MAKEINTRESOURCE(IDD_FORMVIEW), nullptr, &WndProc);
 
-    ExitProcess(0);
     return 0;
 }
 
@@ -53,7 +62,7 @@ int evaluateBStatus(NTSTATUS status)
 void CalculateHashOfFile(wchar_t *fileName, unsigned char *hash, size_t hashLength)
 {
     HANDLE inputFile;
-    inputFile = CreateFile(fileName, FILE_GENERIC_READ,0,nullptr,0,0,0);
+    inputFile = CreateFile(fileName, FILE_GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
     BCRYPT_ALG_HANDLE algHandle;
     NTSTATUS bStatus;
     bStatus = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_SHA256_ALGORITHM, NULL, 0);
@@ -79,7 +88,6 @@ void CalculateHashOfFile(wchar_t *fileName, unsigned char *hash, size_t hashLeng
     {
         bStatus = BCryptHashData(hashHandle, buffer, MAX_READBUFFER, 0);
         evaluateBStatus(bStatus);
-//        inputFile.read((char *)buffer, MAX_READBUFFER);
         ReadFile(inputFile, buffer, MAX_READBUFFER, &bytesRead, nullptr);
 
     }

@@ -132,7 +132,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
-      <EntryPointSymbol>wWinMain</EntryPointSymbol>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
