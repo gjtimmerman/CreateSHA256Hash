@@ -150,7 +150,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             for (int i = 0; i < HASH_LENGTH; i++)
             {
                 wchar_t tmp[4];
-                wsprintf(tmp, L"%2x",hash[i]);
+                wsprintf(tmp, L"%02x",hash[i]);
                 wcscat(hashStr, tmp);
             }
             SetDlgItemText(hWnd, IDC_EDIT2, hashStr);
